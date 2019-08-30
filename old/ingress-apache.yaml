@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "apache"
+  namespace: "test-app"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    app: test-app
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /tomcat
+            backend:
+              serviceName: "test-app-service-apache"
+              servicePort: 80

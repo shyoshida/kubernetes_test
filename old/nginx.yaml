@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "test-app"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "test-app-deployment-nginx"
+  namespace: "test-app"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "nginx"
+    spec:
+      containers:
+      - image: nginx 
+        imagePullPolicy: Always
+        name: "nginx"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "test-app-service-nginx"
+  namespace: "test-app"
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP 
+  type: NodePort
+  selector:
+    app: "nginx"

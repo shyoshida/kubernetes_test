@@ -1,0 +1,77 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "test-app-deployment-apache"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "test-apache"
+    spec:
+      containers:
+      - image: 532783812193.dkr.ecr.ap-northeast-1.amazonaws.com/eks-apache:latest 
+        imagePullPolicy: Always
+        name: "test-apache"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "test-apache-service"
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: "test-apache"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "test-app-deployment-tomcat"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "test-tomcat"
+    spec:
+      containers:
+      - image: 532783812193.dkr.ecr.ap-northeast-1.amazonaws.com/eks-tomcat:latest
+        name: "test-tomcat"
+        ports:
+        - containerPort: 8009
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "test-tomcat-service"
+spec:
+  ports:
+    - port: 8009
+      targetPort: 8009
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: "test-tomcat"
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "test-apache"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    app: test-app
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              serviceName: "test-apache-service"
+              servicePort: 80
